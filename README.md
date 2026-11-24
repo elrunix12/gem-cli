@@ -4,8 +4,6 @@ Use o chatbot Gemini (a IA do Google) direto no terminal. Você digita a pergunt
 
 > **Aviso:** este é um projeto não oficial e não tem nenhuma relação com o Google. "Gemini" é uma marca do Google, usada aqui apenas para indicar com qual serviço o programa conversa.
 
-![Gemini no Terminal em uso](docs/screenshot.png)
-
 ## O que você precisa
 
 - Python instalado no computador (versão 3.10 ou mais nova)
@@ -161,9 +159,9 @@ Digite estes comandos no lugar de uma pergunta:
 | `/code` | Copia só os códigos da última resposta |
 | `/save` | Salva a conversa num arquivo |
 | `/curto` | Liga ou desliga as respostas curtas |
-| `/reset` | Apaga a conversa e começa do zero |
+| `/reset` (ou `/clear`) | Apaga a conversa e começa do zero |
 | `!comando` | Roda um comando do terminal (ex.: `!ls`) |
-| `sair` | Fecha o programa |
+| `sair` (ou `exit`, `quit`) | Fecha o programa |
 
 Para parar uma resposta no meio, aperte `Ctrl+C`.
 
@@ -180,6 +178,53 @@ Ou use só uma vez:
 ```bash
 gem-cli --model nome-do-modelo
 ```
+
+## Configurações avançadas
+
+Além da chave e do modelo, o arquivo `~/.config/python/gem-cli/env` aceita estas opções, uma por linha no formato `NOME=valor`:
+
+| Opção | O que faz | Padrão |
+|---|---|---|
+| `GEMINI_API_KEY` (ou `API_KEY`) | Sua chave do Gemini | nenhum |
+| `GEMINI_MODEL` (ou `MODEL`) | Modelo usado nas respostas | definido pelo programa |
+| `SAVE_DIR` | Pasta onde o `/save` grava as conversas | `~/Documentos/Gemini` |
+| `PROMPT_DIR` | Pasta com os arquivos de "personalidade" | `~/.config/python/gem-cli/prompts` |
+| `COLOR_USER` | Cor do "Você:" | `137;180;250` |
+| `COLOR_GEMINI` | Cor do "Gemini:" | `203;166;247` |
+| `COLOR_SYSTEM` | Cor das mensagens do programa | `166;173;200` |
+| `COLOR_SUCCESS` | Cor das mensagens de sucesso | `166;227;161` |
+| `COLOR_ERROR` | Cor das mensagens de erro | `243;139;168` |
+
+As cores usam o formato `R;G;B`, com cada número de 0 a 255. Se o valor estiver errado, o programa usa a cor padrão. Nas pastas, o `~` funciona.
+
+Exemplo de arquivo `env`:
+
+```
+GEMINI_API_KEY=cole_sua_chave_aqui
+GEMINI_MODEL=nome-do-modelo
+SAVE_DIR=~/Documentos/Conversas
+COLOR_GEMINI=255;200;100
+```
+
+### Usar variáveis de ambiente
+
+Tudo o que está na tabela também pode ser definido como variável de ambiente, o que é útil para testar algo uma vez sem mexer no arquivo. Para a chave, o modelo e as pastas, o programa aceita estes nomes:
+
+- `GEMINI_API_KEY` ou `API_KEY`
+- `GEMINI_MODEL` ou `MODEL`
+- `GEMINI_SAVE_DIR` ou `SAVE_DIR`
+- `GEMINI_PROMPT_DIR` ou `PROMPT_DIR`
+
+As cores usam o mesmo nome da tabela (`COLOR_USER` etc.).
+
+Se a mesma opção aparecer em mais de um lugar, vale esta ordem, da mais forte para a mais fraca:
+
+1. Opção na linha de comando (como `--model`)
+2. Variável de ambiente
+3. Arquivo `env`
+4. Padrão do programa
+
+Com a chave em variável de ambiente, o arquivo `env` não é obrigatório.
 
 ## Dar uma "personalidade" ao Gemini (opcional)
 
@@ -203,7 +248,7 @@ gem-cli --prompt revisor.md
 | O comando `gem-cli` | `~/.local/bin/gem-cli` |
 | Sua chave e configurações | `~/.config/python/gem-cli/env` |
 | Seus arquivos de "personalidade" | `~/.config/python/gem-cli/prompts` |
-| Conversas salvas com `/save` | `~/Documentos/Gemini` |
+| Conversas salvas com `/save` | `~/Documentos/Gemini` (ou a pasta definida em `SAVE_DIR`) |
 
 ## Se algo der errado
 
