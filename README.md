@@ -140,7 +140,7 @@ Ao abrir, ele faz duas perguntas rápidas:
 1. **Arquivo de prompt:** pode apertar Enter para pular.
 2. **Respostas curtas?** Digite `s` (ou Enter) para respostas diretas, ou `n` para respostas mais completas.
 
-Depois é só conversar. Ele lembra do que vocês já falaram.
+Depois é só conversar. Ele lembra do que vocês já falaram na mesma sessão.
 
 Se quiser pular essas perguntas:
 
