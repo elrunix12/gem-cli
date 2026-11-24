@@ -39,11 +39,11 @@ def bootstrap_venv() -> None:
     if _has_dependencies() or os.environ.get("_GEMINI_CLI_BOOTSTRAPPED") == "1":
         return
 
-    xdg_config = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-    config_venv = xdg_config / "python" / "gemini" / ".venv" / "bin" / "python"
+    xdg_data = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
+    share_venv = xdg_data / "gem-cli" / ".venv" / "bin" / "python"
     script_venv = Path(__file__).resolve().parent / ".venv" / "bin" / "python"
 
-    for candidate in (config_venv, script_venv):
+    for candidate in (share_venv, script_venv):
         if candidate.is_file() and os.access(candidate, os.X_OK):
             try:
                 if os.path.samefile(sys.executable, candidate):
@@ -245,7 +245,7 @@ def _parse_env_value(raw_value: str) -> str:
 def load_config(model_override: str | None = None) -> Config:
     """Carrega configuração com precedência: CLI > ambiente > arquivo env > padrões."""
     xdg_config = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-    config_dir = xdg_config / "python" / "gemini"
+    config_dir = xdg_config / "python" / "gem-cli"
     cfg = Config(
         config_dir=config_dir,
         env_file=config_dir / "env",
@@ -995,7 +995,7 @@ class GeminiCLI:
                     self.c_err,
                 )
                 self._print(
-                    f"    Dica: verifique o modelo '{self.cfg.model}' no ~/.config/python/gemini/env.",
+                    f"    Dica: verifique o modelo '{self.cfg.model}' no {self.cfg.env_file}.",
                     self.c_sys,
                 )
             elif status_code == 429:
@@ -1114,7 +1114,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", help="Sobrescreve o modelo definido no arquivo env")
     parser.add_argument(
         "--prompt",
-        help="Nome do arquivo de system prompt em ~/.config/python/gemini/prompts",
+        help="Nome do arquivo de system prompt em ~/.config/python/gem-cli/prompts",
     )
     mode_group = parser.add_mutually_exclusive_group()
     mode_group.add_argument("--curto", action="store_true", help="Inicia com respostas curtas ativadas")

@@ -4,12 +4,14 @@ Use o chatbot Gemini (a IA do Google) direto no terminal. Você digita a pergunt
 
 > **Aviso:** este é um projeto não oficial e não tem nenhuma relação com o Google. "Gemini" é uma marca do Google, usada aqui apenas para indicar com qual serviço o programa conversa.
 
+![Gemini no Terminal em uso](docs/screenshot.png)
+
 ## O que você precisa
 
 - Python instalado no computador (versão 3.10 ou mais nova)
 - Git instalado
 - Uma chave do Gemini, que é grátis. Pegue em https://aistudio.google.com/
-- Duas bibliotecas de Python, que o passo 2 da instalação já instala para você:
+- Duas bibliotecas de Python, que a instalação (automática ou manual) já instala para você:
   - `google-genai`: faz a conversa com o Gemini
   - `rich`: deixa a resposta bonita e formatada no terminal
 - Opcional, só para os comandos `/copy` e `/code` funcionarem: um programa de copiar texto.
@@ -17,11 +19,54 @@ Use o chatbot Gemini (a IA do Google) direto no terminal. Você digita a pergunt
   - Linux com X11: `xclip` ou `xsel`
   - Mac (não testado): o `pbcopy` já vem instalado
 
+Se faltar o Python ou o Git, não tem problema: o instalador automático (logo abaixo) confere tudo e oferece instalar o que estiver faltando.
+
 ## Sistemas testados
 
 O programa foi testado exclusivamente no Debian. Espera-se que funcione em outras distribuições Linux, mas não há garantia. O funcionamento no macOS e no Windows não foi verificado.
 
 ## Como instalar
+
+Escolha um dos dois jeitos: o automático, que faz tudo por você, ou o manual, passo a passo.
+
+### Instalação automática (recomendada)
+
+Copie e cole este comando no terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/elrunix12/gem-cli/main/install.sh | bash
+```
+
+O instalador faz tudo isto:
+
+1. Confere se o Git e o Python estão instalados. Se faltar algo, mostra o comando e **pergunta** se pode instalar usando `sudo` (ele pode pedir a sua senha).
+2. Baixa o programa para a pasta `~/.local/share/gem-cli`.
+3. Cria o ambiente (`.venv`) e instala as bibliotecas.
+4. **Pergunta** a sua chave do Gemini e guarda num arquivo que só você consegue ler. Você pode pular e colocar a chave depois.
+5. Cria o comando `gem-cli` na pasta `~/.local/bin`, sem mexer no `~/.bashrc` nem no `~/.zshrc`. Se essa pasta não estiver no seu PATH, ele avisa como corrigir.
+6. Se não houver um programa de copiar texto, **pergunta** se pode instalar um (opcional, para os comandos `/copy` e `/code`).
+
+Se algo já existir (a sua chave, uma instalação anterior ou outro arquivo chamado `gem-cli` em `~/.local/bin`), ele não sobrescreve. Para instalar o Git e o Python, o instalador conhece apenas os gerenciadores `apt`, `dnf` e `pacman`. Em outros sistemas, instale os dois manualmente antes.
+
+**Distribuições imutáveis** (como Silverblue, SteamOS e NixOS): o instalador não instala pacotes do sistema. Se faltar o Git ou o Python, ele só avisa. Nesse caso, instale pela ferramenta da sua distribuição ou rode o instalador dentro de um contêiner (toolbox ou distrobox). O resto da instalação mexe só na sua pasta pessoal, então funciona normalmente.
+
+Para instalar em outra pasta, use:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/elrunix12/gem-cli/main/install.sh | GEM_CLI_DIR="$HOME/outra-pasta" bash
+```
+
+**Prefere ler o instalador antes de rodar?** É uma boa ideia com qualquer script da internet. Baixe, leia e só então execute:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/elrunix12/gem-cli/main/install.sh -o install.sh
+less install.sh
+bash install.sh
+```
+
+Ao terminar, digite `gem-cli`. Se o terminal disser que o comando não foi encontrado, veja a seção "Se algo der errado".
+
+### Instalação manual
 
 **1. Baixe o programa** para a pasta `~/.local/share/gem-cli`:
 
@@ -48,13 +93,19 @@ chmod 600 ~/.config/python/gem-cli/env
 
 Troque `cole_sua_chave_aqui` pela chave que você pegou no site. O último comando deixa o arquivo visível só para você.
 
-**4. Crie um atalho** para abrir o programa só digitando `gemini`. Coloque esta linha no arquivo `~/.bashrc` (ou `~/.zshrc`, se você usa zsh):
+**4. Crie o comando `gem-cli`** para abrir o programa só digitando o nome dele:
 
 ```bash
-alias gemini='~/.local/share/gem-cli/.venv/bin/python ~/.local/share/gem-cli/gem-cli.py'
+mkdir -p ~/.local/bin
+cat > ~/.local/bin/gem-cli <<'EOF'
+#!/usr/bin/env bash
+# gem-cli launcher
+exec "$HOME/.local/share/gem-cli/.venv/bin/python" "$HOME/.local/share/gem-cli/gem-cli.py" "$@"
+EOF
+chmod +x ~/.local/bin/gem-cli
 ```
 
-Depois feche e abra o terminal de novo.
+Se você instalou em outra pasta, troque `$HOME/.local/share/gem-cli` pelo caminho que usou. Depois abra um novo terminal e digite `gem-cli`.
 
 ## Como atualizar
 
@@ -62,23 +113,28 @@ Depois feche e abra o terminal de novo.
 cd ~/.local/share/gem-cli && git pull
 ```
 
+Também dá para rodar o instalador automático de novo. Ele percebe que o programa já está instalado e só atualiza o programa e as bibliotecas, sem mexer na sua chave.
+
 ## Como desinstalar
 
-Apague a pasta do programa e a pasta de configuração:
+Apague a pasta do programa, a pasta de configuração e o comando:
 
 ```bash
 rm -rf ~/.local/share/gem-cli
 rm -rf ~/.config/python/gem-cli
+rm -f ~/.local/bin/gem-cli
 ```
 
-A segunda linha apaga também a sua chave e os seus arquivos de "personalidade". Depois, remova a linha do `alias gemini=...` do arquivo `~/.bashrc` (ou `~/.zshrc`). As conversas salvas com `/save` ficam em `~/Documentos/Gemini`; apague essa pasta também se quiser.
+A segunda linha apaga também a sua chave e os seus arquivos de "personalidade". As conversas salvas com `/save` ficam em `~/Documentos/Gemini`; apague essa pasta também se quiser.
+
+Se você usou uma versão antiga da instalação, que criava um atalho chamado `gemini`, remova também a linha `alias gemini=...` do arquivo `~/.bashrc` (ou `~/.zshrc`).
 
 ## Como usar
 
 Abra o programa e escreva sua pergunta:
 
 ```bash
-gemini
+gem-cli
 ```
 
 Ao abrir, ele faz duas perguntas rápidas:
@@ -91,8 +147,8 @@ Depois é só conversar. Ele lembra do que vocês já falaram.
 Se quiser pular essas perguntas:
 
 ```bash
-gemini --curto     # respostas curtas
-gemini --longo     # respostas detalhadas
+gem-cli --curto     # respostas curtas
+gem-cli --longo     # respostas detalhadas
 ```
 
 ## Comandos úteis
@@ -122,7 +178,7 @@ GEMINI_MODEL=nome-do-modelo
 Ou use só uma vez:
 
 ```bash
-gemini --model nome-do-modelo
+gem-cli --model nome-do-modelo
 ```
 
 ## Dar uma "personalidade" ao Gemini (opcional)
@@ -136,7 +192,7 @@ Você é um revisor de código. Responda sempre em português.
 Depois abra o programa com:
 
 ```bash
-gemini --prompt revisor.md
+gem-cli --prompt revisor.md
 ```
 
 ## Onde ficam as coisas
@@ -144,6 +200,7 @@ gemini --prompt revisor.md
 | O quê | Onde |
 |---|---|
 | O programa e o `.venv` | `~/.local/share/gem-cli` |
+| O comando `gem-cli` | `~/.local/bin/gem-cli` |
 | Sua chave e configurações | `~/.config/python/gem-cli/env` |
 | Seus arquivos de "personalidade" | `~/.config/python/gem-cli/prompts` |
 | Conversas salvas com `/save` | `~/Documentos/Gemini` |
@@ -152,11 +209,12 @@ gemini --prompt revisor.md
 
 | O que aconteceu | O que fazer |
 |---|---|
+| `gem-cli: comando não encontrado` | A pasta `~/.local/bin` não está no seu PATH. No Bash ou Zsh, adicione a linha `export PATH="$HOME/.local/bin:$PATH"` ao `~/.bashrc` ou `~/.zshrc`. No Fish, rode `fish_add_path ~/.local/bin`. Depois abra um novo terminal. Em muitas distribuições, sair e entrar de novo na sessão também resolve. |
 | "Servidor ocupado" ou erro 503 | O Google está sobrecarregado. O programa tenta de novo sozinho. Se continuar, espere um pouco ou troque de modelo. |
 | Erro 404 | O nome do modelo está errado. Confira o arquivo `env`. |
 | Erro 429 | Você passou do limite gratuito. Espere um tempo. |
 | Erro no meio da conversa | Digite `/reset` para começar uma conversa nova. |
-| "Dependência ausente" | Refaça o passo 2 da instalação e confira se o atalho usa o Python do `.venv`. |
+| "Dependência ausente" | Rode o instalador automático de novo, ou refaça o passo 2 da instalação manual e confira se o comando `gem-cli` usa o Python do `.venv`. |
 | `/copy` não funciona | Instale `wl-copy` (Wayland) ou `xclip` (X11). |
 
 ## Privacidade
