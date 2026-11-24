@@ -160,7 +160,6 @@ Digite estes comandos no lugar de uma pergunta:
 | `/save` | Salva a conversa num arquivo |
 | `/curto` | Liga ou desliga as respostas curtas |
 | `/reset` (ou `/clear`) | Apaga a conversa e começa do zero |
-| `!comando` | Roda um comando do terminal (ex.: `!ls`) |
 | `sair` (ou `exit`, `quit`) | Fecha o programa |
 
 Para parar uma resposta no meio, aperte `Ctrl+C`.
